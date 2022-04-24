@@ -8,10 +8,44 @@ const walletAddr = "";
 const imgSideLen = 180;
 const minNoImgs = 3;
 const maxNoImgs = 5;
+const minValRate = 0.8;
 // end temp
+
+interface ProductData {
+  title: string;
+  brand: string;
+  modelName: string;
+  modelNumber: string;
+  year: number;
+  serialNumber: string;
+  description: string;
+  creator: string;
+  owner: string;
+  requestValue: number;
+  minValue: number;
+  imageURLs: string[];
+  contractURL: string;
+}
+
+const initData: ProductData = {
+  title: "",
+  brand: "",
+  modelName: "",
+  modelNumber: "",
+  year: 2000,
+  serialNumber: "",
+  description: "",
+  creator: "",
+  owner: "",
+  requestValue: 0,
+  minValue: 0,
+  imageURLs: [],
+  contractURL: "",
+};
 
 const NewMint = () => {
   const [activeStep, setActiveStep] = useState(0);
+  const [prodData, setProdData] = useState<ProductData>({ ...initData, creator: walletAddr, owner: walletAddr });
   const [fileName, setFileName] = useState("");
   const [imgURLs, setImgURLs] = useState<string[]>([]);
   const [imgFiles, setImgFiles] = useState<File[]>([]);
@@ -27,6 +61,13 @@ const NewMint = () => {
       const blob = new Blob([theFile]);
       setImgURLs((urls) => [URL.createObjectURL(blob), ...urls]);
     }
+  };
+
+  const onDataUpdate = (key: keyof ProductData) => (e: ChangeEvent<HTMLInputElement>) => {
+    let val: string | number;
+    val = key === "requestValue" ? +e.target.value : e.target.value;
+    setProdData((data) => ({ ...data, [key]: val }));
+    if (key === "requestValue") setProdData((data) => ({ ...data, minValue: +e.target.value * minValRate }));
   };
 
   const uploadDisable = imgURLs.length === maxNoImgs;
@@ -62,43 +103,71 @@ const NewMint = () => {
       body: (
         <>
           <Typography sx={{ mt: "2.5em" }}>Please enter as much detail about the product as possible</Typography>
-          <TextField sx={{ mt: "1em" }} fullWidth label="Title" variant="outlined" required />
+          <TextField
+            label="Title"
+            sx={{ mt: "1em" }}
+            fullWidth
+            variant="outlined"
+            value={prodData.title}
+            onChange={onDataUpdate("title")}
+            required
+          />
           <Box display="flex" gap="1em">
             <TextField
+              label="Brand"
               sx={{ mt: "1em" }}
               fullWidth
-              label="Brand"
               variant="outlined"
               placeholder="Eg: Samsung"
+              value={prodData.brand}
+              onChange={onDataUpdate("brand")}
               required
             />
             <TextField
+              label="Model Name"
               sx={{ mt: "1em" }}
               fullWidth
-              label="Model Name"
               variant="outlined"
               placeholder="Eg: Galaxy S20"
+              value={prodData.modelName}
+              onChange={onDataUpdate("modelName")}
               required
             />
           </Box>
           <Box display="flex" gap="1em">
             <TextField
+              label="Model Number"
               sx={{ mt: "1em" }}
               fullWidth
-              label="Model Number"
               variant="outlined"
-              placeholder="Eg: GHX9750i-B"
+              placeholder="Eg: SM-G980F"
+              value={prodData.modelNumber}
+              onChange={onDataUpdate("modelNumber")}
               required
             />
-            <TextField sx={{ mt: "1em" }} type="number" label="Model Year" variant="outlined" required />
+            <TextField
+              label="Model Year"
+              sx={{ mt: "1em" }}
+              type="number"
+              variant="outlined"
+              required
+              value={prodData.year}
+              onChange={onDataUpdate("year")}
+            />
             {/* <input type="number" min={1900} max={2022}></input> */}
-            <TextField sx={{ mt: "1em" }} type="number" label="Serial Number" variant="outlined" />
+            <TextField
+              label="Serial Number"
+              sx={{ mt: "1em" }}
+              variant="outlined"
+              value={prodData.serialNumber}
+              onChange={onDataUpdate("serialNumber")}
+            />
           </Box>
           <TextField
+            label="Your wallet address"
             sx={{ mt: "1em" }}
             fullWidth
             disabled
-            label="Your wallet address"
             variant="outlined"
             value={walletAddr ? "" : "Please connect"}
           />
@@ -112,13 +181,24 @@ const NewMint = () => {
                 startAdornment={<InputAdornment position="start">$</InputAdornment>}
                 label="Amount"
                 required
+                value={prodData.requestValue}
+                onChange={onDataUpdate("requestValue")}
               />
             </FormControl>
           </Box>
           <Typography textAlign="right" color="text.secondary">
             Min. backing value: $ 2800
           </Typography>
-          <TextField sx={{ mt: "1em" }} fullWidth label="Product description" multiline rows={4} required />
+          <TextField
+            label="Product description"
+            sx={{ mt: "1em" }}
+            fullWidth
+            multiline
+            rows={4}
+            required
+            value={prodData.description}
+            onChange={onDataUpdate("description")}
+          />
         </>
       ),
     },
@@ -244,7 +324,10 @@ const NewMint = () => {
               </Button>
               <Box sx={{ flex: "1 1 auto" }} />
               <Button
-                onClick={() => setActiveStep((step) => step + 1)}
+                onClick={() => {
+                  setActiveStep((step) => step + 1);
+                  console.log("prodData: ", prodData);
+                }}
                 disabled={activeStep === 2 && imgURLs.length < minNoImgs}
               >
                 {activeStep === stepContent.length - 1 ? "Finish" : "Next"}
