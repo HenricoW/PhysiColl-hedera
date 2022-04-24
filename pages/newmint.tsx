@@ -1,15 +1,35 @@
-import { ReactNode, useState } from "react";
-import { Box, Button, Card, FormControl, InputAdornment, InputLabel, OutlinedInput } from "@mui/material";
+import { ChangeEvent, ReactNode, useState } from "react";
+import { Box, Button, Card, FormControl, ImageList, ImageListItem, OutlinedInput } from "@mui/material";
+import { InputAdornment, InputLabel } from "@mui/material";
 import { Step, StepLabel, Stepper, TextField, Typography } from "@mui/material";
 
 // temp
 const walletAddr = "";
+const imgSideLen = 180;
+const minNoImgs = 3;
+const maxNoImgs = 5;
 // end temp
 
 const NewMint = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [fileName, setFileName] = useState("");
+  const [imgURLs, setImgURLs] = useState<string[]>([]);
+  const [imgFiles, setImgFiles] = useState<File[]>([]);
   const [uploadResponse, setUploadResponse] = useState("");
+
+  const onImgAdd = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.files);
+    if (e.target.files && e.target.files.length > 0) {
+      const theFile = e.target.files[0];
+      setFileName(theFile.name ?? "");
+
+      setImgFiles((imgs) => [theFile, ...imgs]);
+      const blob = new Blob([theFile]);
+      setImgURLs((urls) => [URL.createObjectURL(blob), ...urls]);
+    }
+  };
+
+  const uploadDisable = imgURLs.length === maxNoImgs;
 
   const stepContent = [
     {
@@ -106,7 +126,20 @@ const NewMint = () => {
       label: "Upload images",
       body: (
         <>
-          <Typography mt="1em">Select (an) image file(s)</Typography>
+          <Typography mt="1em">
+            Select between {minNoImgs} and {maxNoImgs} image files
+          </Typography>
+          <ImageList
+            sx={{ height: imgSideLen, width: imgURLs.length * imgSideLen, m: "1em auto" }}
+            cols={imgURLs.length}
+            rowHeight={imgSideLen}
+          >
+            {imgURLs.map((url) => (
+              <ImageListItem key={url}>
+                <img src={url} width={imgSideLen} height={imgSideLen} loading="lazy" style={{ overflow: "hidden" }} />
+              </ImageListItem>
+            ))}
+          </ImageList>
           {uploadResponse ? (
             <Box height="6em" display="flex" alignItems="center">
               <Typography m="0 auto" color="success.main" variant="h5">
@@ -121,13 +154,15 @@ const NewMint = () => {
                   accept="image/*"
                   id="upload-btn"
                   name="upload"
-                  onChange={(e) => setFileName(e.target.files?.[0].name ?? "")}
+                  onChange={(e) => onImgAdd(e)}
+                  disabled={uploadDisable}
                   style={{ display: "none" }}
                 />
                 <Button
                   variant="outlined"
                   component="span"
                   sx={{ display: "block", width: "fit-content", margin: "1em auto 2em" }}
+                  disabled={uploadDisable}
                 >
                   Choose Image
                 </Button>
@@ -137,8 +172,16 @@ const NewMint = () => {
                   {fileName}
                 </Typography>
               ) : null}
-              <Button type="submit" variant="outlined" color="success" sx={{ display: "block", m: "0 auto 2em" }}>
-                Upload
+              <Button
+                variant="outlined"
+                color="error"
+                sx={{ display: "block", width: "fit-content", margin: "1em auto 0" }}
+                onClick={() => {
+                  setImgFiles([]);
+                  setImgURLs([]);
+                }}
+              >
+                Reset
               </Button>
             </form>
           )}
@@ -200,7 +243,10 @@ const NewMint = () => {
                 Back
               </Button>
               <Box sx={{ flex: "1 1 auto" }} />
-              <Button onClick={() => setActiveStep((step) => step + 1)}>
+              <Button
+                onClick={() => setActiveStep((step) => step + 1)}
+                disabled={activeStep === 2 && imgURLs.length < minNoImgs}
+              >
                 {activeStep === stepContent.length - 1 ? "Finish" : "Next"}
               </Button>
             </Box>
