@@ -2,6 +2,8 @@ import { ChangeEvent, ReactNode, useState } from "react";
 import { Box, Button, Card, FormControl, ImageList, ImageListItem, OutlinedInput } from "@mui/material";
 import { InputAdornment, InputLabel } from "@mui/material";
 import { Step, StepLabel, Stepper, TextField, Typography } from "@mui/material";
+import { ProductData } from "../lib/utils/data-structs";
+import NewMintContract from "../components/Steps/NewMintContract";
 
 // temp
 const walletAddr = "";
@@ -10,22 +12,6 @@ const minNoImgs = 3;
 const maxNoImgs = 5;
 const minValRate = 0.8;
 // end temp
-
-interface ProductData {
-  title: string;
-  brand: string;
-  modelName: string;
-  modelNumber: string;
-  year: number;
-  serialNumber: string;
-  description: string;
-  creator: string;
-  owner: string;
-  requestValue: number;
-  minValue: number;
-  imageURLs: string[];
-  contractURL: string;
-}
 
 const initData: ProductData = {
   title: "",
@@ -36,20 +22,26 @@ const initData: ProductData = {
   serialNumber: "",
   description: "",
   creator: "",
+  mintDate: 0,
   owner: "",
+  backer: "",
   requestValue: 0,
   minValue: 0,
+  backedVal: 0,
+  backedDate: 0,
   imageURLs: [],
   contractURL: "",
 };
 
 const NewMint = () => {
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(3);
   const [prodData, setProdData] = useState<ProductData>({ ...initData, creator: walletAddr, owner: walletAddr });
   const [fileName, setFileName] = useState("");
   const [imgURLs, setImgURLs] = useState<string[]>([]);
   const [imgFiles, setImgFiles] = useState<File[]>([]);
   const [uploadResponse, setUploadResponse] = useState("");
+  const [imgUploadResponse, setImgUploadResponse] = useState("");
+  const [docUploadResponse, setDocUploadResponse] = useState("");
 
   const onImgAdd = (e: ChangeEvent<HTMLInputElement>) => {
     console.log(e.target.files);
@@ -204,6 +196,7 @@ const NewMint = () => {
     },
     {
       label: "Upload images",
+      // TODO: Upload to storage in step (needed in next step)
       body: (
         <>
           <Typography mt="1em">
@@ -270,15 +263,12 @@ const NewMint = () => {
     },
     {
       label: "Contract",
-      body: (
-        <>
-          <Typography>Make sure your wallet is connected (click &quot;Connect&quot; in the top-right).</Typography>
-          <Typography>The following steps will guide you through the process for minting a product.</Typography>
-        </>
-      ),
+      // TODO: Prepop w/ img urls, desc data, upload orig. Also, sign & upload _s1 version
+      body: <NewMintContract />,
     },
     {
-      label: "Final review",
+      label: "Mint token",
+      // TODO: mint nft
       body: (
         <>
           <Typography>Make sure your wallet is connected (click &quot;Connect&quot; in the top-right).</Typography>
