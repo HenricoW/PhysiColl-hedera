@@ -31,6 +31,24 @@ const NewMintImages = ({ imgURLs, setImgURLs }: NewMintImagesProps) => {
     }
   };
 
+  const onUpload = async () => {
+    const formData = new FormData();
+
+    for (let i = 0; i < imgFiles.length; i++) {
+      formData.append("image-" + i, imgFiles[i], imgFiles[i].name);
+    }
+
+    const resp = await fetch("/api/uploadimages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      body: formData,
+    });
+
+    console.log("client resp: ", resp);
+  };
+
   return (
     <>
       <Typography mt="1em">
@@ -54,7 +72,7 @@ const NewMintImages = ({ imgURLs, setImgURLs }: NewMintImagesProps) => {
           </Typography>
         </Box>
       ) : (
-        <form onSubmit={() => {}}>
+        <form>
           <label htmlFor="upload-btn" style={{ textAlign: "center" }}>
             <input
               type="file"
@@ -79,17 +97,21 @@ const NewMintImages = ({ imgURLs, setImgURLs }: NewMintImagesProps) => {
               {fileName}
             </Typography>
           ) : null}
-          <Button
-            variant="outlined"
-            color="error"
-            sx={{ display: "block", width: "fit-content", margin: "1em auto 0" }}
-            onClick={() => {
-              setImgFiles([]);
-              setImgURLs([]);
-            }}
-          >
-            Reset
-          </Button>
+          <Box display="flex" justifyContent="space-around">
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => {
+                setImgFiles([]);
+                setImgURLs([]);
+              }}
+            >
+              Reset
+            </Button>
+            <Button variant="outlined" disabled={imgURLs.length < minNoImgs} onClick={onUpload}>
+              Upload
+            </Button>
+          </Box>
         </form>
       )}
     </>
