@@ -6,7 +6,7 @@ import { ProductData } from "../lib/utils/data-structs";
 import NewMintContract from "../components/Steps/NewMintContract";
 
 // temp
-const walletAddr = "";
+const walletAddr = "0x81745b7339d5067e82b93ca6bbad125f214525d3";
 const imgSideLen = 180;
 const minNoImgs = 3;
 const maxNoImgs = 5;
@@ -21,9 +21,9 @@ const initData: ProductData = {
   year: 2000,
   serialNumber: "",
   description: "",
-  creator: "",
+  creator: walletAddr,
   mintDate: 0,
-  owner: "",
+  owner: walletAddr,
   backer: "",
   requestValue: 0,
   minValue: 0,
@@ -34,8 +34,8 @@ const initData: ProductData = {
 };
 
 const NewMint = () => {
-  const [activeStep, setActiveStep] = useState(3);
-  const [prodData, setProdData] = useState<ProductData>({ ...initData, creator: walletAddr, owner: walletAddr });
+  const [activeStep, setActiveStep] = useState(0);
+  const [prodData, setProdData] = useState<ProductData>(initData);
   const [fileName, setFileName] = useState("");
   const [imgURLs, setImgURLs] = useState<string[]>([]);
   const [imgFiles, setImgFiles] = useState<File[]>([]);
@@ -161,7 +161,7 @@ const NewMint = () => {
             fullWidth
             disabled
             variant="outlined"
-            value={walletAddr ? "" : "Please connect"}
+            value={walletAddr ? walletAddr : "Please connect"}
           />
           <Box display="flex" gap="1em" alignItems="center" mt=".5em">
             <Typography m=".5em 0 0 auto">Requested value: </Typography>
@@ -264,7 +264,7 @@ const NewMint = () => {
     {
       label: "Contract",
       // TODO: Prepop w/ img urls, desc data, upload orig. Also, sign & upload _s1 version
-      body: <NewMintContract />,
+      body: <NewMintContract prodData={prodData} />,
     },
     {
       label: "Mint token",
