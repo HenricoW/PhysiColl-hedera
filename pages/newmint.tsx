@@ -1,19 +1,18 @@
-import { ChangeEvent, ReactNode, useState } from "react";
-import { Box, Button, Card, FormControl, ImageList, ImageListItem, OutlinedInput } from "@mui/material";
-import { InputAdornment, InputLabel } from "@mui/material";
-import { Step, StepLabel, Stepper, TextField, Typography } from "@mui/material";
+import { ReactNode, useState } from "react";
+import { Box, Button, Card, Step, StepLabel, Stepper, Typography } from "@mui/material";
 import { ProductData } from "../lib/utils/data-structs";
 import NewMintContract from "../components/Steps/NewMintContract";
+import NewMintOverview from "../components/Steps/NewMintOverview";
+import NewMintForm from "../components/Forms/NewMintForm";
+import NewMintImages from "../components/Steps/NewMintImages";
+import NewMintMint from "../components/Steps/NewMintMint";
 
 // temp
 const walletAddr = "0x81745b7339d5067e82b93ca6bbad125f214525d3";
-const imgSideLen = 180;
-const minNoImgs = 3;
-const maxNoImgs = 5;
-const minValRate = 0.8;
+export const minNoImgs = 3;
 // end temp
 
-const initData: ProductData = {
+export const initData: ProductData = {
   title: "",
   brand: "",
   modelName: "",
@@ -35,246 +34,35 @@ const initData: ProductData = {
 
 const NewMint = () => {
   const [activeStep, setActiveStep] = useState(0);
-  const [prodData, setProdData] = useState<ProductData>(initData);
-  const [fileName, setFileName] = useState("");
+  const [productData, setProductData] = useState<ProductData>(initData);
+  const [isDataValid, setIsDataValid] = useState(false);
   const [imgURLs, setImgURLs] = useState<string[]>([]);
-  const [imgFiles, setImgFiles] = useState<File[]>([]);
-  const [uploadResponse, setUploadResponse] = useState("");
-  const [imgUploadResponse, setImgUploadResponse] = useState("");
-  const [docUploadResponse, setDocUploadResponse] = useState("");
-
-  const onImgAdd = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.files);
-    if (e.target.files && e.target.files.length > 0) {
-      const theFile = e.target.files[0];
-      setFileName(theFile.name ?? "");
-
-      setImgFiles((imgs) => [theFile, ...imgs]);
-      const blob = new Blob([theFile]);
-      setImgURLs((urls) => [URL.createObjectURL(blob), ...urls]);
-    }
-  };
-
-  const onDataUpdate = (key: keyof ProductData) => (e: ChangeEvent<HTMLInputElement>) => {
-    let val: string | number;
-    val = key === "requestValue" ? +e.target.value : e.target.value;
-    setProdData((data) => ({ ...data, [key]: val }));
-    if (key === "requestValue") setProdData((data) => ({ ...data, minValue: +e.target.value * minValRate }));
-  };
-
-  const uploadDisable = imgURLs.length === maxNoImgs;
+  // const [imgUploadResponse, setImgUploadResponse] = useState("");
+  // const [docUploadResponse, setDocUploadResponse] = useState("");
 
   const stepContent = [
     {
       label: "Minting overview",
-      body: (
-        <>
-          <Typography>Make sure your wallet is connected (click &quot;Connect&quot; in the top-right).</Typography>
-          <Typography>The following steps will guide you through the process for minting a product.</Typography>
-          <ol>
-            <li>
-              <Typography>Enter the details for the product you want to mint</Typography>
-            </li>
-            <li>
-              <Typography>Add images to show the condition of the product</Typography>
-            </li>
-            <li>
-              <Typography>
-                Preview the contract (if it goes to sale) that will be used in the event of a sale
-              </Typography>
-            </li>
-            <li>
-              <Typography>Final review and payment</Typography>
-            </li>
-          </ol>
-        </>
-      ),
+      body: <NewMintOverview />,
     },
     {
       label: "Product details",
-      body: (
-        <>
-          <Typography sx={{ mt: "2.5em" }}>Please enter as much detail about the product as possible</Typography>
-          <TextField
-            label="Title"
-            sx={{ mt: "1em" }}
-            fullWidth
-            variant="outlined"
-            value={prodData.title}
-            onChange={onDataUpdate("title")}
-            required
-          />
-          <Box display="flex" gap="1em">
-            <TextField
-              label="Brand"
-              sx={{ mt: "1em" }}
-              fullWidth
-              variant="outlined"
-              placeholder="Eg: Samsung"
-              value={prodData.brand}
-              onChange={onDataUpdate("brand")}
-              required
-            />
-            <TextField
-              label="Model Name"
-              sx={{ mt: "1em" }}
-              fullWidth
-              variant="outlined"
-              placeholder="Eg: Galaxy S20"
-              value={prodData.modelName}
-              onChange={onDataUpdate("modelName")}
-              required
-            />
-          </Box>
-          <Box display="flex" gap="1em">
-            <TextField
-              label="Model Number"
-              sx={{ mt: "1em" }}
-              fullWidth
-              variant="outlined"
-              placeholder="Eg: SM-G980F"
-              value={prodData.modelNumber}
-              onChange={onDataUpdate("modelNumber")}
-              required
-            />
-            <TextField
-              label="Model Year"
-              sx={{ mt: "1em" }}
-              type="number"
-              variant="outlined"
-              required
-              value={prodData.year}
-              onChange={onDataUpdate("year")}
-            />
-            {/* <input type="number" min={1900} max={2022}></input> */}
-            <TextField
-              label="Serial Number"
-              sx={{ mt: "1em" }}
-              variant="outlined"
-              value={prodData.serialNumber}
-              onChange={onDataUpdate("serialNumber")}
-            />
-          </Box>
-          <TextField
-            label="Your wallet address"
-            sx={{ mt: "1em" }}
-            fullWidth
-            disabled
-            variant="outlined"
-            value={walletAddr ? walletAddr : "Please connect"}
-          />
-          <Box display="flex" gap="1em" alignItems="center" mt=".5em">
-            <Typography m=".5em 0 0 auto">Requested value: </Typography>
-            <FormControl sx={{ mt: ".5em", width: "12em" }}>
-              <InputLabel htmlFor="reqAmount">Amount</InputLabel>
-              <OutlinedInput
-                id="reqAmount"
-                type="number"
-                startAdornment={<InputAdornment position="start">$</InputAdornment>}
-                label="Amount"
-                required
-                value={prodData.requestValue}
-                onChange={onDataUpdate("requestValue")}
-              />
-            </FormControl>
-          </Box>
-          <Typography textAlign="right" color="text.secondary">
-            Min. backing value: $ 2800
-          </Typography>
-          <TextField
-            label="Product description"
-            sx={{ mt: "1em" }}
-            fullWidth
-            multiline
-            rows={4}
-            required
-            value={prodData.description}
-            onChange={onDataUpdate("description")}
-          />
-        </>
-      ),
+      body: <NewMintForm setProductData={setProductData} setIsDataValid={setIsDataValid} />,
     },
     {
       label: "Upload images",
       // TODO: Upload to storage in step (needed in next step)
-      body: (
-        <>
-          <Typography mt="1em">
-            Select between {minNoImgs} and {maxNoImgs} image files
-          </Typography>
-          <ImageList
-            sx={{ height: imgSideLen, width: imgURLs.length * imgSideLen, m: "1em auto" }}
-            cols={imgURLs.length}
-            rowHeight={imgSideLen}
-          >
-            {imgURLs.map((url) => (
-              <ImageListItem key={url}>
-                <img src={url} width={imgSideLen} height={imgSideLen} loading="lazy" style={{ overflow: "hidden" }} />
-              </ImageListItem>
-            ))}
-          </ImageList>
-          {uploadResponse ? (
-            <Box height="6em" display="flex" alignItems="center">
-              <Typography m="0 auto" color="success.main" variant="h5">
-                {uploadResponse}
-              </Typography>
-            </Box>
-          ) : (
-            <form onSubmit={() => {}}>
-              <label htmlFor="upload-btn" style={{ textAlign: "center" }}>
-                <input
-                  type="file"
-                  accept="image/*"
-                  id="upload-btn"
-                  name="upload"
-                  onChange={(e) => onImgAdd(e)}
-                  disabled={uploadDisable}
-                  style={{ display: "none" }}
-                />
-                <Button
-                  variant="outlined"
-                  component="span"
-                  sx={{ display: "block", width: "fit-content", margin: "1em auto 2em" }}
-                  disabled={uploadDisable}
-                >
-                  Choose Image
-                </Button>
-              </label>
-              {fileName ? (
-                <Typography align="center" m="1em 0 .5em">
-                  {fileName}
-                </Typography>
-              ) : null}
-              <Button
-                variant="outlined"
-                color="error"
-                sx={{ display: "block", width: "fit-content", margin: "1em auto 0" }}
-                onClick={() => {
-                  setImgFiles([]);
-                  setImgURLs([]);
-                }}
-              >
-                Reset
-              </Button>
-            </form>
-          )}
-        </>
-      ),
+      body: <NewMintImages imgURLs={imgURLs} setImgURLs={setImgURLs} />,
     },
     {
       label: "Contract",
       // TODO: Prepop w/ img urls, desc data, upload orig. Also, sign & upload _s1 version
-      body: <NewMintContract prodData={prodData} />,
+      body: <NewMintContract prodData={productData} />,
     },
     {
       label: "Mint token",
       // TODO: mint nft
-      body: (
-        <>
-          <Typography>Make sure your wallet is connected (click &quot;Connect&quot; in the top-right).</Typography>
-          <Typography>The following steps will guide you through the process for minting a product.</Typography>
-        </>
-      ),
+      body: <NewMintMint />,
     },
   ];
 
@@ -314,11 +102,8 @@ const NewMint = () => {
               </Button>
               <Box sx={{ flex: "1 1 auto" }} />
               <Button
-                onClick={() => {
-                  setActiveStep((step) => step + 1);
-                  console.log("prodData: ", prodData);
-                }}
-                disabled={activeStep === 2 && imgURLs.length < minNoImgs}
+                onClick={() => setActiveStep((step) => step + 1)}
+                disabled={(activeStep === 1 && !isDataValid) || (activeStep === 2 && imgURLs.length < minNoImgs)}
               >
                 {activeStep === stepContent.length - 1 ? "Finish" : "Next"}
               </Button>
