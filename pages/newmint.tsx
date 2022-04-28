@@ -37,6 +37,7 @@ const NewMint = () => {
   const [productData, setProductData] = useState<ProductData>(initData);
   const [isDataValid, setIsDataValid] = useState(false);
   const [imgURLs, setImgURLs] = useState<string[]>([]);
+  const [verfImgURL, setVerfImgURL] = useState("");
   // const [imgUploadResponse, setImgUploadResponse] = useState("");
   // const [docUploadResponse, setDocUploadResponse] = useState("");
 
@@ -52,7 +53,14 @@ const NewMint = () => {
     {
       label: "Upload images",
       // TODO: Upload to storage in step (needed in next step)
-      body: <NewMintImages imgURLs={imgURLs} setImgURLs={setImgURLs} />,
+      body: (
+        <NewMintImages
+          imgURLs={imgURLs}
+          setImgURLs={setImgURLs}
+          verfImgURL={verfImgURL}
+          setVerfImgURL={setVerfImgURL}
+        />
+      ),
     },
     {
       label: "Contract",

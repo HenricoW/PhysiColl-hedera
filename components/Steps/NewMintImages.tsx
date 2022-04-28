@@ -1,6 +1,11 @@
 import { Box, Button, ImageList, ImageListItem, Typography } from "@mui/material";
 import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
+import { uploadImages } from "../../lib/utils/image-utils";
 import { minNoImgs } from "../../pages/newmint";
+import FileSelectBtn from "../Buttons/FileSelectBtn";
+
+// TODO:
+// - "next" btn conditional on upload response
 
 // temp
 const imgSideLen = 180;
@@ -11,49 +16,52 @@ const uploadResponse = "";
 interface NewMintImagesProps {
   imgURLs: string[];
   setImgURLs: Dispatch<SetStateAction<string[]>>;
+  verfImgURL: string;
+  setVerfImgURL: (url: string) => void;
 }
 
-const NewMintImages = ({ imgURLs, setImgURLs }: NewMintImagesProps) => {
+const NewMintImages = ({ imgURLs, setImgURLs, verfImgURL, setVerfImgURL }: NewMintImagesProps) => {
   const [fileName, setFileName] = useState("");
   const [imgFiles, setImgFiles] = useState<File[]>([]);
+  const [verifImg, setVerifImg] = useState<File>();
 
-  const uploadDisable = imgURLs.length === maxNoImgs;
+  const selectDisable = imgURLs.length === maxNoImgs;
 
-  const onImgAdd = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.files);
+  const onImgAdd = (imgType: "product" | "verify") => (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const theFile = e.target.files[0];
       setFileName(theFile.name ?? "");
 
-      setImgFiles((imgs) => [theFile, ...imgs]);
       const blob = new Blob([theFile]);
-      setImgURLs((urls) => [URL.createObjectURL(blob), ...urls]);
+      switch (imgType) {
+        case "product":
+          setImgFiles((imgs) => [theFile, ...imgs]);
+          setImgURLs((urls) => [URL.createObjectURL(blob), ...urls]);
+          break;
+        case "verify":
+          setVerifImg(theFile);
+          setVerfImgURL(URL.createObjectURL(blob));
+          break;
+        default:
+          break;
+      }
     }
   };
 
-  const onUpload = async () => {
-    const formData = new FormData();
-
-    for (let i = 0; i < imgFiles.length; i++) {
-      formData.append("image-" + i, imgFiles[i], imgFiles[i].name);
-    }
-
-    const resp = await fetch("/api/uploadimages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      body: formData,
-    });
-
-    console.log("client resp: ", resp);
-  };
+  const notEnoughImgs = imgURLs.length < minNoImgs;
 
   return (
     <>
       <Typography mt="1em">
         Select between {minNoImgs} and {maxNoImgs} image files
       </Typography>
+
+      {fileName ? (
+        <Typography align="center" m="1em 0 .5em">
+          {fileName}
+        </Typography>
+      ) : null}
+
       <ImageList
         sx={{ height: imgSideLen, width: imgURLs.length * imgSideLen, m: "1em auto" }}
         cols={imgURLs.length}
@@ -65,55 +73,44 @@ const NewMintImages = ({ imgURLs, setImgURLs }: NewMintImagesProps) => {
           </ImageListItem>
         ))}
       </ImageList>
-      {uploadResponse ? (
-        <Box height="6em" display="flex" alignItems="center">
-          <Typography m="0 auto" color="success.main" variant="h5">
-            {uploadResponse}
-          </Typography>
+
+      <FileSelectBtn onFileAdd={onImgAdd("product")} disabled={selectDisable} mimeType="image/*" id="upload-btn">
+        Choose Image
+      </FileSelectBtn>
+
+      <Button
+        variant="outlined"
+        color="error"
+        sx={{ display: "block", m: "0 auto" }}
+        onClick={() => {
+          setImgFiles([]);
+          setImgURLs([]);
+        }}
+      >
+        Reset
+      </Button>
+
+      <Typography mt="2em">Add a verification image according to the following illustration:</Typography>
+
+      {verfImgURL ? (
+        <Box textAlign="center" mt="1em">
+          <img src={verfImgURL} width={imgSideLen} height={imgSideLen} style={{ overflow: "hidden" }} />
         </Box>
-      ) : (
-        <form>
-          <label htmlFor="upload-btn" style={{ textAlign: "center" }}>
-            <input
-              type="file"
-              accept="image/*"
-              id="upload-btn"
-              name="upload"
-              onChange={(e) => onImgAdd(e)}
-              disabled={uploadDisable}
-              style={{ display: "none" }}
-            />
-            <Button
-              variant="outlined"
-              component="span"
-              sx={{ display: "block", width: "fit-content", margin: "1em auto 2em" }}
-              disabled={uploadDisable}
-            >
-              Choose Image
-            </Button>
-          </label>
-          {fileName ? (
-            <Typography align="center" m="1em 0 .5em">
-              {fileName}
-            </Typography>
-          ) : null}
-          <Box display="flex" justifyContent="space-around">
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={() => {
-                setImgFiles([]);
-                setImgURLs([]);
-              }}
-            >
-              Reset
-            </Button>
-            <Button variant="outlined" disabled={imgURLs.length < minNoImgs} onClick={onUpload}>
-              Upload
-            </Button>
-          </Box>
-        </form>
-      )}
+      ) : null}
+
+      <FileSelectBtn onFileAdd={onImgAdd("verify")} disabled={notEnoughImgs} mimeType="image/*" id="verif-btn">
+        Add Verification Image
+      </FileSelectBtn>
+
+      <Button
+        variant="contained"
+        color="success"
+        sx={{ display: "block", m: "2em auto 0" }}
+        disabled={notEnoughImgs || !verfImgURL}
+        onClick={() => uploadImages(imgFiles, verifImg)}
+      >
+        Upload All Images
+      </Button>
     </>
   );
 };
