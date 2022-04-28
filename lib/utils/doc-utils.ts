@@ -1,5 +1,5 @@
 import { PDFDocument, StandardFonts } from "pdf-lib";
-import { ProductData } from "../utils/data-structs";
+import { ProductData } from "./data-structs";
 
 export const textWrapper = (text: string, charLimit: number = 80) => {
   if (text.length <= charLimit) return text;
@@ -29,7 +29,7 @@ export const createContract = (data: ProductData) => {
         "Product title \t\t\t\t: " + data.title + "\n",
         "Product name & model \t\t : " + data.brand + " " + data.modelName + " " + data.modelNumber + "\n",
         "Product year & serial no. \t: " + data.year + ", " + data.serialNumber + "\n\n",
-        "Product description:\n" + textWrapper(data.description) + "\n",
+        "Product description:\n" + textWrapper(data.description) + "\n\n",
         "Selling range \t\t\t\t: " + "$ " + data.minValue.toFixed(2) + " to $ " + data.requestValue.toFixed(2) + "\n",
       ];
 
@@ -48,6 +48,41 @@ export const createContract = (data: ProductData) => {
 
       res(docBuffer);
     } catch (err) {
+      rej(err);
+    }
+  });
+};
+
+export const createS1Doc = async (data: ProductData, addr: string, sig: string) => {
+  return new Promise<Buffer>(async (res, rej) => {
+    try {
+      const buffer = await createContract(data);
+      const doc = await PDFDocument.load(buffer);
+      const font = await doc.embedFont(StandardFonts.CourierBold);
+
+      const newPage = doc.addPage();
+      const createText = [
+        "PhysiColl document signed.\n",
+        Array(80).fill("_").join("") + "\n\n",
+        "Signer wallet address\t : " + addr + "\n",
+        "Signature:\n" + textWrapper(sig) + "\n\n",
+      ];
+
+      const { height } = newPage.getSize();
+      newPage.drawText(createText.join(""), {
+        x: 50,
+        y: height - 50,
+        size: 10,
+        lineHeight: 14,
+        font,
+      });
+
+      const docOS = await doc.save();
+      const docBuffer = Buffer.from(docOS);
+
+      res(docBuffer);
+    } catch (err) {
+      console.log("Error adding signature: ", err);
       rej(err);
     }
   });
