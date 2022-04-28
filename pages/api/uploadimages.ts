@@ -4,6 +4,8 @@ import formidable from "formidable";
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const form = formidable({
     keepExtensions: true,
+    maxFiles: 6,
+    maxFileSize: 3 * 1024 ** 2,
     uploadDir: "images",
     filter: function ({ mimetype }) {
       return mimetype ? mimetype.includes("image") : false;
@@ -13,11 +15,12 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   form.parse(req, (err, fields, files) => {
     if (err) {
       console.log(err);
-      res.status(400).json({ error: "could not parse files" });
+      res.status(400).json({ message: "Could not parse files" });
       return;
     }
 
-    res.status(200).send({});
+    console.log("form files: ", Object.keys(files));
+    res.status(201).json({ message: "Successfully uploaded files" });
   });
 }
 
