@@ -6,6 +6,9 @@ import NewMintOverview from "../components/Steps/NewMintOverview";
 import NewMintForm from "../components/Forms/NewMintForm";
 import NewMintImages from "../components/Steps/NewMintImages";
 import NewMintMint from "../components/Steps/NewMintMint";
+import { appName } from "./_app";
+
+// TODO: sub components handle 'Next' btn activation
 
 // temp
 const walletAddr = "0x81745b7339d5067e82b93ca6bbad125f214525d3";
@@ -33,7 +36,7 @@ export const initData: ProductData = {
 };
 
 const NewMint = () => {
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(5);
   const [productData, setProductData] = useState<ProductData>(initData);
   const [isDataValid, setIsDataValid] = useState(false);
   const [imgURLs, setImgURLs] = useState<string[]>([]);
@@ -70,7 +73,7 @@ const NewMint = () => {
     {
       label: "Mint token",
       // TODO: mint nft
-      body: <NewMintMint />,
+      body: <NewMintMint prodData={productData} />,
     },
   ];
 
@@ -120,7 +123,13 @@ const NewMint = () => {
         ) : (
           <>
             {/* Body */}
-            <Typography sx={{ mt: 2, mb: 1 }}>All steps completed - you&apos;re finished</Typography>
+            <Box m="4em 1em 2em" textAlign="center">
+              <Typography variant="h4">Congratulations!</Typography>
+              <Typography variant="h5" mb="2em">
+                You have successfully added your item to {appName}.
+              </Typography>
+              <Typography>Go to your Dashboard or the Product Listings page to view this item.</Typography>
+            </Box>
             {/* TODO: Add link to final contract upload location */}
             {/* TODO: Link to go back to Dashboard OR view product listings */}
 
