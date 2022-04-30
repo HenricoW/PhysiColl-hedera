@@ -1,7 +1,8 @@
-import { Button, Link, Paper, styled, Table, TableBody, TableCell, TableContainer } from "@mui/material";
-import { tableCellClasses, TableHead, TableRow, Typography } from "@mui/material";
+import { Button, Paper, Table, TableBody, TableContainer } from "@mui/material";
+import { TableHead, TableRow, Typography } from "@mui/material";
 import { ProductData } from "../../lib/utils/data-structs";
 import { appName } from "../../pages/_app";
+import TwoFieldTable, { StyledTableCell, StyledTableRow } from "../Tables/TwoFieldTable";
 
 // temp
 const imageData = [
@@ -51,33 +52,17 @@ const fieldNames =
 const fieldLookup: { [key: string]: string } = {};
 for (let i = 0; i < fieldsToShow.length; i++) fieldLookup[fieldsToShow[i]] = fieldNames[i];
 
-const gatewayPrefix = "https://ipfs.infura.io/";
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
-    backgroundColor: "#bfbfbf",
-  },
-  "&:nth-of-type(even)": {
-    backgroundColor: "#ccc",
-  },
-  // hide last border
-  "&:last-child td, &:last-child th": {
-    border: 0,
-  },
-}));
+const imageTableTitles = ["Uploaded Images", "Image Location"];
+const docTableTitles = ["Contract Copies", "Document Location"];
+const LColLeftMargin = "4em";
+const RColWidth = "70%";
 
 const NewMintMint = ({ prodData }: NewMintMintProps) => {
-  const pData: { [key: string]: any } = prodData;
+  const pData: { [key: string]: any } = {
+    ...prodData,
+    requestValue: prodData.requestValue.toFixed(2),
+    minValue: prodData.minValue.toFixed(2),
+  };
 
   return (
     <>
@@ -90,8 +75,8 @@ const NewMintMint = ({ prodData }: NewMintMintProps) => {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <StyledTableCell sx={{ ml: "4em" }}>Product detail</StyledTableCell>
-              <StyledTableCell align="left" width="70%">
+              <StyledTableCell sx={{ ml: LColLeftMargin }}>Product detail</StyledTableCell>
+              <StyledTableCell align="left" width={RColWidth}>
                 Value
               </StyledTableCell>
             </TableRow>
@@ -101,7 +86,7 @@ const NewMintMint = ({ prodData }: NewMintMintProps) => {
               .filter((el) => fieldsToShow.includes(el))
               .map((okey) => (
                 <StyledTableRow key={okey}>
-                  <StyledTableCell align="left" sx={{ ml: "4em" }}>
+                  <StyledTableCell align="left" sx={{ ml: LColLeftMargin }}>
                     {fieldLookup[okey]}
                   </StyledTableCell>
                   <StyledTableCell align="left">{pData[okey]}</StyledTableCell>
@@ -111,59 +96,9 @@ const NewMintMint = ({ prodData }: NewMintMintProps) => {
         </Table>
       </TableContainer>
 
-      <TableContainer component={Paper} sx={{ m: "1em 0" }}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell sx={{ ml: "4em" }}>Uploaded Images</StyledTableCell>
-              <StyledTableCell align="left" width="70%">
-                Image Location
-              </StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {imageData.map((iData) => (
-              <StyledTableRow key={iData.name}>
-                <StyledTableCell align="left" sx={{ ml: "4em" }}>
-                  {iData.name}
-                </StyledTableCell>
-                <StyledTableCell align="left">
-                  <Link href={gatewayPrefix + iData.url} target="_blank">
-                    {iData.url}
-                  </Link>
-                </StyledTableCell>
-              </StyledTableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <TwoFieldTable titles={imageTableTitles} tableData={imageData} />
 
-      <TableContainer component={Paper} sx={{ m: "1em 0" }}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <StyledTableCell sx={{ ml: "4em" }}>Contract Copies</StyledTableCell>
-              <StyledTableCell align="left" width="70%">
-                Document Location
-              </StyledTableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {contractData.map((cData) => (
-              <StyledTableRow key={cData.name}>
-                <StyledTableCell align="left" sx={{ ml: "4em" }}>
-                  {cData.name}
-                </StyledTableCell>
-                <StyledTableCell align="left">
-                  <Link href={gatewayPrefix + cData.url} target="_blank">
-                    {cData.url}
-                  </Link>
-                </StyledTableCell>
-              </StyledTableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <TwoFieldTable titles={docTableTitles} tableData={contractData} />
 
       <Button sx={{ display: "block", m: "2em auto" }} variant="contained" onClick={() => {}}>
         Confirm &amp; Mint NFT
