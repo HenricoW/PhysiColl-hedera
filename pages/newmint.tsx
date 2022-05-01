@@ -36,7 +36,7 @@ export const initData: ProductData = {
 };
 
 const NewMint = () => {
-  const [activeStep, setActiveStep] = useState(5);
+  const [activeStep, setActiveStep] = useState(0);
   const [productData, setProductData] = useState<ProductData>(initData);
   const [isDataValid, setIsDataValid] = useState(false);
   const [imgURLs, setImgURLs] = useState<string[]>([]);

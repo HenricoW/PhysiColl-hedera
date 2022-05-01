@@ -7,10 +7,11 @@ interface TwoFieldTableProps {
   titles: string[];
   tableData: {
     name: string;
-    url: string;
+    value: string;
   }[];
   LColLeftMargin?: string;
   RColWidth?: string;
+  isLink?: boolean;
 }
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -36,10 +37,16 @@ export const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-const TwoFieldTable = ({ titles, tableData, LColLeftMargin = "4em", RColWidth = "70%" }: TwoFieldTableProps) => {
+const TwoFieldTable = ({
+  titles,
+  tableData,
+  LColLeftMargin = "4em",
+  RColWidth = "70%",
+  isLink = true,
+}: TwoFieldTableProps) => {
   return (
     <TableContainer component={Paper} sx={{ m: "1em 0" }}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+      <Table sx={{ width: "100%" }} aria-label="simple table">
         <TableHead>
           <TableRow>
             <StyledTableCell sx={{ ml: LColLeftMargin }}>{titles[0]}</StyledTableCell>
@@ -55,9 +62,13 @@ const TwoFieldTable = ({ titles, tableData, LColLeftMargin = "4em", RColWidth = 
                 {tData.name}
               </StyledTableCell>
               <StyledTableCell align="left">
-                <Link href={gatewayPrefix + tData.url} target="_blank">
-                  {tData.url}
-                </Link>
+                {isLink ? (
+                  <Link href={gatewayPrefix + tData.value} target="_blank">
+                    {tData.value}
+                  </Link>
+                ) : (
+                  tData.value
+                )}
               </StyledTableCell>
             </StyledTableRow>
           ))}
