@@ -76,9 +76,6 @@ const NewMintContract = ({ prodData }: NewMintContractProps) => {
     try {
       const resp = await fetch("/api/uploadcontract", {
         method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
         body: formData,
       });
 
@@ -95,6 +92,9 @@ const NewMintContract = ({ prodData }: NewMintContractProps) => {
 
   return (
     <>
+      <Typography variant="h6" mb="1em">
+        Contracts and signing
+      </Typography>
       <Typography>
         Now, take a look at the contract that will be in effect if this product is backed and both parties agree to
         convert to a Sale.

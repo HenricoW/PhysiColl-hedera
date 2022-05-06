@@ -6,7 +6,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     keepExtensions: true,
     maxFiles: 2,
     maxFileSize: 1024 ** 2,
-    uploadDir: "pdfs",
     filter: function ({ mimetype }) {
       return mimetype ? mimetype.includes("pdf") : false;
     },
@@ -27,5 +26,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 export const config = {
   api: {
     externalResolver: true,
+    bodyParser: false,
   },
 };

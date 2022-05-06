@@ -14,13 +14,18 @@ export const uploadImages = async (imgFiles: File[], verifImg: File | undefined)
   }
   if (verifImg) formData.append("image-v", verifImg, verifImg.name);
 
-  const resp = await fetch("/api/uploadimages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-    body: formData,
-  });
+  try {
+    const resp = await fetch("/api/uploadimages", {
+      method: "POST",
+      body: formData,
+    });
 
-  console.log("client resp: ", resp);
+    if (resp.status >= 400) {
+      console.log(`Request error code: ${resp.status} (${resp.statusText}): ${(await resp.json()).message}`);
+    } else {
+      console.log("Images uploaded successfully");
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };

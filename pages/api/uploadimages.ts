@@ -6,7 +6,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     keepExtensions: true,
     maxFiles: 6,
     maxFileSize: 3 * 1024 ** 2,
-    uploadDir: "images",
     filter: function ({ mimetype }) {
       return mimetype ? mimetype.includes("image") : false;
     },
@@ -27,5 +26,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 export const config = {
   api: {
     externalResolver: true,
+    bodyParser: false,
   },
 };
