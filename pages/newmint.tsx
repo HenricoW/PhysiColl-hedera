@@ -28,11 +28,12 @@ export const initData: ProductData = {
   owner: walletAddr,
   backer: "",
   requestValue: 0,
-  minValue: 0,
-  backedVal: 0,
-  backedDate: 0,
+  offeredRate: 0,
+  payoutPeriod: 0,
+  noUnits: 0,
+  unitsBacked: 0,
   imageURLs: [],
-  contractURL: "",
+  contractURLs: [],
 };
 
 const NewMint = () => {

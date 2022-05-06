@@ -1,7 +1,8 @@
-import { Box, Button, FormControl, InputAdornment, InputLabel, OutlinedInput } from "@mui/material";
+import { Box, Button, FormControl, InputAdornment, InputLabel, MenuItem, OutlinedInput, Select } from "@mui/material";
 import { TextField, Typography } from "@mui/material";
 import React, { ChangeEvent, useState } from "react";
 import { ProductData } from "../../lib/utils/data-structs";
+import { isValidPData } from "../../lib/utils/tools";
 import { initData } from "../../pages/newmint";
 import FormField from "./FormField";
 
@@ -15,21 +16,30 @@ interface NewMintFormProps {
   setIsDataValid: (val: boolean) => void;
 }
 
+export const requiredNumberEntries = ["year", "requestValue", "offeredRate", "payoutPeriod", "noUnits"];
+
 const NewMintForm = ({ setProductData, setIsDataValid }: NewMintFormProps) => {
   const [prodData, setProdData] = useState<ProductData>(initData);
+  const [btnText, setBtnText] = useState("Save Data");
 
   const onDataUpdate = (key: keyof ProductData) => (e: ChangeEvent<HTMLInputElement>) => {
-    let val: string | number;
-    val = key === "requestValue" ? +e.target.value : e.target.value;
+    const val: string | number = requiredNumberEntries.includes(key) ? +e.target.value : e.target.value;
+
     setProdData((data) => ({ ...data, [key]: val }));
     if (key === "requestValue") setProdData((data) => ({ ...data, minValue: +e.target.value * minValRate }));
   };
 
+  const onPayPeriod = (numDays: number) => setProdData((data) => ({ ...data, payoutPeriod: numDays }));
+
   const onSave = () => {
     // TODO: data validation
-    setIsDataValid(true);
+    console.log("is valid data?: ", isValidPData(prodData));
+    setIsDataValid(false);
 
-    setProductData(prodData);
+    if (isValidPData(prodData)) {
+      setIsDataValid(true);
+      setProductData(prodData);
+    }
   };
 
   return (
@@ -54,9 +64,9 @@ const NewMintForm = ({ setProductData, setIsDataValid }: NewMintFormProps) => {
         variant="outlined"
         value={walletAddr ? walletAddr : "Please connect"}
       />
-      <Box display="flex" gap="1em" alignItems="center" mt=".5em">
+      <Box display="flex" gap="1em" alignItems="center" mt=".5em" flexWrap="wrap">
         <Typography m=".5em 0 0 auto">Requested value: </Typography>
-        <FormControl sx={{ mt: ".5em", width: "12em" }}>
+        <FormControl sx={{ mt: ".5em", width: "10em" }}>
           <InputLabel htmlFor="reqAmount">Amount</InputLabel>
           <OutlinedInput
             id="reqAmount"
@@ -68,10 +78,51 @@ const NewMintForm = ({ setProductData, setIsDataValid }: NewMintFormProps) => {
             onChange={onDataUpdate("requestValue")}
           />
         </FormControl>
+
+        <Typography m=".5em 0 0 auto">Split offering: </Typography>
+        <FormControl sx={{ mt: ".5em", width: "8em" }}>
+          <InputLabel htmlFor="unitCount">Number of Units</InputLabel>
+          <OutlinedInput
+            id="unitCount"
+            type="number"
+            endAdornment={<InputAdornment position="end">Units</InputAdornment>}
+            label="Number of Units"
+            required
+            value={prodData.noUnits}
+            onChange={onDataUpdate("noUnits")}
+          />
+        </FormControl>
+
+        <Typography m=".5em 0 0 auto">Offering Annual Rate: </Typography>
+        <FormControl sx={{ mt: ".5em", width: "8em" }}>
+          <InputLabel htmlFor="intRate">Annual Rate</InputLabel>
+          <OutlinedInput
+            id="intRate"
+            type="number"
+            endAdornment={<InputAdornment position="end">%</InputAdornment>}
+            label="Annual Rate"
+            required
+            value={prodData.offeredRate}
+            onChange={onDataUpdate("offeredRate")}
+          />
+        </FormControl>
+
+        <Typography m=".5em 0 0 auto">Interest payout period: </Typography>
+        <FormControl sx={{ mt: ".5em", width: "10em" }}>
+          <InputLabel htmlFor="payPeriod">Every # days</InputLabel>
+          <Select
+            value={prodData.payoutPeriod}
+            label="Every # days"
+            onChange={(e) => {
+              onPayPeriod(+e.target.value);
+            }}
+          >
+            <MenuItem value={7}>7 days</MenuItem>
+            <MenuItem value={14}>14 days</MenuItem>
+            <MenuItem value={30}>30 days</MenuItem>
+          </Select>
+        </FormControl>
       </Box>
-      <Typography textAlign="right" color="text.secondary">
-        Min. backing value: $ 2800
-      </Typography>
       <TextField
         label="Product description"
         sx={{ mt: "1em" }}
@@ -83,7 +134,7 @@ const NewMintForm = ({ setProductData, setIsDataValid }: NewMintFormProps) => {
         onChange={onDataUpdate("description")}
       />
       <Button variant="contained" sx={{ display: "block", m: "1.5em auto 0" }} onClick={onSave}>
-        Save Data
+        {btnText}
       </Button>
     </>
   );

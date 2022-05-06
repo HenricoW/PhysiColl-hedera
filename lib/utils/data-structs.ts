@@ -7,13 +7,14 @@ export interface ProductData {
   serialNumber: string;
   description: string;
   creator: string;
-  mintDate: number;
+  mintDate: number; // skip at form
   owner: string;
-  backer: string;
+  backer: string; // skip at form
   requestValue: number;
-  minValue: number;
-  backedVal: number;
-  backedDate: number;
-  imageURLs: string[];
-  contractURL: string;
+  offeredRate: number;
+  payoutPeriod: number;
+  noUnits: number;
+  unitsBacked: number; // skip at form
+  imageURLs: string[]; // skip at form
+  contractURLs: string[]; // skip at form
 }
