@@ -1,3 +1,5 @@
+import { HashConnectTypes } from "hashconnect";
+
 export interface ProductData {
   title: string;
   brand: string;
@@ -17,4 +19,15 @@ export interface ProductData {
   unitsBacked: number; // skip at form
   imageURLs: string[]; // skip at form
   contractURLs: string[]; // skip at form
+}
+
+export interface SaveData {
+  topic: string;
+  pairingString: string;
+  privateKey: string;
+  pairedWalletData: HashConnectTypes.WalletMetadata | null;
+  pairedAccounts: string[];
+  netWork?: string;
+  id?: string;
+  accountIds?: string[];
 }

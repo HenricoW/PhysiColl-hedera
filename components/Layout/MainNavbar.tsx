@@ -2,6 +2,8 @@ import { AppBar, Box, Button, Container, Toolbar, Typography } from "@mui/materi
 import BlurOnIcon from "@mui/icons-material/BlurOn";
 import { useRouter } from "next/router";
 import { appName } from "../../pages/_app";
+import { useContext } from "react";
+import hederaContext from "../../contexts/hederaContext";
 
 // temp
 const walletAddr = false;
@@ -9,6 +11,17 @@ const walletAddr = false;
 
 const MainNavBar = () => {
   const router = useRouter();
+  const { connect, walletData, installedExtensions } = useContext(hederaContext);
+  const { accountIds, netWork, id } = walletData;
+
+  console.log("network: ", netWork);
+  console.log("account ids: ", accountIds);
+  console.log("extensions: ", installedExtensions);
+
+  const onConnect = () => {
+    if (installedExtensions) connect();
+    else alert("Please install hashconnect wallet extension first. from chrome web store.");
+  };
 
   return (
     <>
@@ -36,8 +49,10 @@ const MainNavBar = () => {
             </Box>
 
             <Box ml="1em">
-              {walletAddr ? null : (
-                <Button variant="contained" onClick={() => {}}>
+              {accountIds && accountIds.length > 0 ? (
+                accountIds[0]
+              ) : (
+                <Button variant="contained" onClick={onConnect}>
                   CONNECT
                 </Button>
               )}
